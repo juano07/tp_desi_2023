@@ -1,0 +1,66 @@
+#pasajeros, #agencias, #operarios {
+	width: 100%;
+}
+
+#opciones {
+	margin-top: 15rem
+}
+
+.logo {
+	width: 120px;
+	max-width: 100%;
+	height: auto;
+}
+
+#filtroBusqueda {
+	margin: 10px 0px 10px 10px;
+}
+
+#cargarObjeto {
+	margin: 10px 0px;
+}
+
+i {
+	font-size: 15px;
+}
+
+#editBtn, #deleteBtn {
+	padding: 1px 6px;
+}
+
+#saveBtn, #modifyBtn {
+	margin-bottom: 10px;
+}
+
+.modal-body {
+	padding: 0.1rem 1rem !important;
+}
+
+.alert-success, .alert-danger {
+	animation: hide 0s 3.5s forwards;
+}
+
+.NORMAL {
+	background-color: palegreen !important;
+}
+
+.REPROGRAMADO {
+	background-color: rgb(255, 255, 100) !important;
+}
+
+.CANCELADO {
+	background-color: rgb(255, 155, 117) !important;
+}
+
+@keyframes hide { to {visibility: hidden; opacity:0; height: 0rem; padding: 0rem; margin-bottom: 0rem;} }
+
+/* Hide arrows from input number for different browsers */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}

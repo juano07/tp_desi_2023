@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión Aeropuerto de Sauce Viejo</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+	<link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/a509a56f8e.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+</head>
+<body>
+	<header class="navbar navbar-expand-lg navbar-dark bg-primary">
+		<a class="navbar-brand" href="/"><img class="logo" src="/images/logoSV.svg" alt="logo"></a>
+		<!-- Navbar links -->
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav ml-auto">
+		      <li class="nav-item">
+		        <a class="nav-link" th:href="@{/clientes}">Clientes</a>
+		      </li>
+		      <li class="nav-item">
+		        <a class="nav-link" th:href="@{/ciudades}">Ciudades</a>
+		      </li>
+		      <li class="nav-item">
+		        <a class="nav-link active" th:href="@{/vuelos}">Vuelos</a>
+		      </li>
+		       <li class="nav-item">
+		        <a class="nav-link" th:href="@{/aviones}">Aviones</a>
+		      </li>
+		       <li class="nav-item">
+		        <a class="nav-link" th:href="@{/tasas}">Tasas</a>
+		      </li>
+		       <li class="nav-item">
+		        <a class="nav-link" th:href="@{/tickets}">Tickets</a>
+		      </li>
+		    </ul>			
+		</div>
+	</header>
+	
+	<div id="filtroBusqueda">	   
+        <label>Buscar vuelo: </label>
+        <input type="text" name="destino" id="inputDestino" placeholder="Ingrese el destino" onkeyup="searchVuelo()">
+        
+        <label>Filtrar fecha: </label>
+        <input type="date" name="fecha" id="inputFecha" onchange="filterVueloByFecha()">
+	</div>
+
+	<div>
+		<div class="alert alert-success" role="alert" th:if="${exito}">
+	        <span th:text="${exito}"></span>
+	    </div>   
+	    <div class="alert alert-danger" role="alert" th:if="${error}">
+	        <span th:text="${error}"></span>
+	    </div>
+	    
+		<table id="dataTable" class="table table-striped text-center" th:if="${vuelos.size() > 0}">
+			<thead>
+				<tr>
+					<th>Origen</th>
+					<th>Destino</th>
+					<th>Tipo de vuelo</th>
+					<th>Fecha y hora</th>
+					<th>Modelo avión</th>
+					<th>Estado del vuelo</th>
+					<th>Precio</th>
+					<th>Asientos disponibles</th>	
+					<th>Acciones</th>				
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="vuelo : ${vuelos}" th:id="${vuelo.idVuelo}">
+					<td th:text="${vuelo.ciudadOrigen}"></td>
+					<td th:text="${vuelo.ciudadDestino}"></td>
+					<td th:text="${vuelo.tipoVuelo}"></td>
+					<td th:text="${vuelo.fechayhora}"></td>
+					<td th:text="${vuelo.avion}"></td>
+					<td th:text="${vuelo.estadoVuelo}"></td>
+					<td th:text="${vuelo.precioVuelo}"></td>
+					<td th:text="${vuelo.asientosDisponibles}"></td>
+					<td> 
+						 <button id="editBtn" class="btn btn-primary" data-toggle="modal" data-target="#editModal" onclick="editObject(this)">
+							 <i class="fa-solid fa-pen-to-square"></i> 
+						 </button>
+						 <button id="deleteBtn" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal" onclick="identifyObject(this)">
+							 <i class="fa-solid fa-trash"></i> 
+						 </button>
+					</td>									
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<div class="text-center">
+		<button id="cargarObjeto" type="button" class="btn btn-primary" data-toggle="modal" data-target="#createModal">
+		  Cargar Vuelo
+		</button>	
+ 	</div>
+ 	
+ <!-- Create modal -->
+<div class="modal fade" id="createModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">     
+		<div class="modal-header">
+	    <h5 class="modal-title" id="createModalLabel">Alta vuelo</h5>
+	    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        	<span aria-hidden="true">&times;</span>
+        </button>
+		</div>
+		<div class="modal-body">
+	    <form id="createForm">
+	        <div class="form-group">
+	            <label for="ciudadOrigen">Origen</label>
+	            <select th:value="*{ciudadOrigen}" class="form-control" id="ciudadOrigen" required>
+                    <option th:each="ciudad :${objectList.get(2)}"
+                            th:value="${ciudad.idCiudad}"
+                            th:text="${ciudad.nombreCiudad}"/>
+                </select>	            
+	        </div>
+	        <div class="form-group">
+	            <label for="ciudadDestino">Destino</label>
+	            <select th:value="*{ciudadDestino}" class="form-control" id="ciudadDestino" required>
+                    <option th:each="ciudad :${objectList.get(2)}"
+                            th:value="${ciudad.idCiudad}"
+                            th:text="${ciudad.nombreCiudad}"/>
+                </select>
+	        </div>
+	        <div class="form-group">
+	            <label for="tipoVuelo">Tipo de vuelo</label>
+	            <select th:value="*{tipoVuelo}" class="form-control" id="tipoVuelo" required>
+                    <option th:each="tipoVuelo :${objectList.get(0)}"
+                            th:value="${tipoVuelo}"
+                            th:text="${tipoVuelo}"/>
+                </select>
+	        </div>
+	        <div class="form-group">
+	            <label for="fechayhora">Fecha y hora</label>
+	            <input type="datetime-local" class="form-control" id="fechayhora" placeholder="Fecha y hora" th:value="*{fechayhora}" required>
+	        </div>
+	        <div class="form-group">
+	            <label for="avion">Modelo avión</label>
+	            <select th:value="*{avion}" class="form-control" id="avion" required>
+                    <option th:each="avion :${objectList.get(3)}"
+                            th:value="${avion.idAvion}"
+                            th:text="${avion.modelo}"/>
+                </select>
+	        </div>
+	        <div class="form-group">
+	            <label for="estadoVuelo">Estado de vuelo</label>
+	            <select class="form-control" id="estadoVuelo" th:value="*{estadoVuelo}" required>
+                    <option th:each="estadoVuelo :${objectList.get(1)}"
+                            th:value="${estadoVuelo}"
+                            th:text="${estadoVuelo}"/>
+                </select>
+	        </div>
+	        <div class="form-group">
+	            <label for="precioVuelo">Precio</label>
+	            <input type="number" class="form-control" id="precioVuelo" th:value="*{precioVuelo}" required>
+	        </div>         
+	        <button id="saveBtn" type="submit" class="btn btn-primary btn-lg btn-block">Cargar</button>
+	    </form>
+	    </div>	 	     
+    </div>
+  </div>
+</div>
+
+<!-- Edit modal -->
+<div class="modal fade" id="editModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">     
+		<div class="modal-header">
+	    <h5 class="modal-title" id="editModalLabel">Editar vuelo</h5>
+	    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+        </button>
+		</div>
+		<div class="modal-body">
+	    <form id="updateForm">
+	        <div class="form-group">
+	            <label for="editCiudadOrigen">Origen</label>
+	            <select class="form-control" id="editCiudadOrigen" required>
+                    <option th:each="ciudad :${objectList.get(2)}"
+                            th:value="${ciudad.idCiudad}"
+                            th:text="${ciudad.nombreCiudad}"/>
+                </select>	            
+	        </div>
+	        <div class="form-group">
+	            <label for="editCiudadDestino">Destino</label>
+	            <select class="form-control" id="editCiudadDestino" required>
+                    <option th:each="ciudad :${objectList.get(2)}"
+                            th:value="${ciudad.idCiudad}"
+                            th:text="${ciudad.nombreCiudad}"/>
+                </select>
+	        </div>
+	        <div class="form-group">
+	            <label for="editTipoVuelo">Tipo de vuelo</label>
+	            <select class="form-control" id="editTipoVuelo" required>
+                    <option th:each="tipoVuelo :${objectList.get(0)}"
+                            th:value="${tipoVuelo}"
+                            th:text="${tipoVuelo}"/>
+                </select>
+	        </div>
+	        <div class="form-group">
+	            <label for="editFechayhora">Fecha y hora</label>
+	            <input type="datetime-local" class="form-control" id="editFechayhora" placeholder="Fecha y hora" required>
+	        </div>
+	        <div class="form-group">
+	            <label for="editAvion">Modelo avión</label>
+	            <select class="form-control" id="editAvion" required>
+                    <option th:each="avion :${objectList.get(3)}"
+                            th:value="${avion.idAvion}"
+                            th:text="${avion.modelo}"/>
+                </select>
+	        </div>
+	        <div class="form-group">
+	            <label for="editEstadoVuelo">Estado de vuelo</label>
+	            <select class="form-control" id="editEstadoVuelo" required>
+                    <option th:each="estadoVuelo :${objectList.get(1)}"
+                            th:value="${estadoVuelo}"
+                            th:text="${estadoVuelo}"/>
+                </select>
+	        </div>	
+	        <div class="form-group">
+	            <label for="editPrecio">Precio</label>
+	            <input type="number" class="form-control" id="editPrecio" required>
+	        </div>	        	   
+	        <input type="hidden" class="form-control" id="editId">     
+	        <button id="modifyBtn" type="submit" class="btn btn-primary btn-lg btn-block">Modificar</button>
+	    </form>
+	    </div>	 	     
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirmation modal -->
+<div class="modal" id="deleteModal" aria-labelledby="deleteModalLabel" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirmación de borrado</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Está seguro que desea borrar el vuelo seleccionado?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+        <button id="deleteConfirmationBtn" type="button" class="btn btn-primary">Si</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+	<script src="/js/vuelos.js"></script>
+</body>
+</html>

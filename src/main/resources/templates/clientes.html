@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión Aeropuerto de Sauce Viejo</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+	<link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/a509a56f8e.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+</head>
+<body>
+	<header class="navbar navbar-expand-lg navbar-dark bg-primary">
+		<a class="navbar-brand" href="/"><img class="logo" src="/images/logoSV.svg" alt="logo"></a>
+		<!-- Navbar links -->
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav ml-auto">
+		      <li class="nav-item">
+		        <a class="nav-link active" th:href="@{/clientes}">Clientes</a>
+		      </li>
+		      <li class="nav-item">
+		        <a class="nav-link" th:href="@{/ciudades}">Ciudades</a>
+		      </li>
+		      <li class="nav-item">
+		        <a class="nav-link" th:href="@{/vuelos}">Vuelos</a>
+		      </li>
+		       <li class="nav-item">
+		        <a class="nav-link" th:href="@{/aviones}">Aviones</a>
+		      </li>
+		       <li class="nav-item">
+		        <a class="nav-link" th:href="@{/tasas}">Tasas</a>
+		      </li>
+		       <li class="nav-item">
+		        <a class="nav-link" th:href="@{/tickets}">Tickets</a>
+		      </li>
+		    </ul>			
+		</div>
+	</header>
+	
+	<div id="filtroBusqueda">	   
+        <label>Buscar cliente: </label>
+        <input type="number" name="dni" id="inputDni" placeholder="Ingrese el DNI" onkeyup="searchCliente()">
+	</div>
+
+	<div>
+	    <div class="alert alert-success" role="alert" th:if="${exito}">
+	        <span th:text="${exito}"></span>
+	    </div>
+	    <div class="alert alert-danger" role="alert" th:if="${error}">
+	        <span th:text="${error}"></span>
+	    </div>
+	
+	    <table class="table table-striped text-center" th:if="${clientes.size() > 0}">
+	        <thead>
+	        <tr>
+	            <th>Apellido y Nombre</th>
+	            <th>DNI</th>
+	            <th>Domicilio</th>
+	            <th>Correo electrónico</th>
+	            <th>Fecha de nacimiento</th>
+	            <th>Pasaporte</th>
+	            <th>Acciones</th>
+	        </tr>
+	        </thead>
+	        
+	        <tbody>	        
+	        <tr th:each="clientes : ${clientes}" th:id="${clientes.dni}">
+	            <td th:text="${clientes.apellidoNombre}"></td>
+	            <td th:text="${clientes.dni}"></td>
+	            <td th:text="${clientes.domicilio}"></td>
+	            <td th:text="${clientes.email}"></td>
+	            <td th:text="${clientes.fechaNacimiento}"></td>
+	            <td th:text="${clientes.numeroPasaporte}"></td>
+	            <td> 
+					<button id="editBtn" class="btn btn-primary" data-toggle="modal" data-target="#editModal" onclick="editObject(this)">
+    					<i class="fa-solid fa-pen-to-square"></i> 
+					</button>
+					<button id="deleteBtn" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal" onclick="identifyObject(this)">
+    					<i class="fa-solid fa-trash"></i> 
+					</button>
+				</td>
+	        </tr>
+	        </tbody>
+	    </table>
+	</div>	
+
+<div class="text-center">
+	<button id="cargarObjeto" type="button" class="btn btn-primary" data-toggle="modal" data-target="#createModal">
+	  Cargar Cliente
+	</button>	
+</div>
+
+<!-- Create modal -->
+<div class="modal fade" id="createModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">     
+		<div class="modal-header">
+	    <h5 class="modal-title" id="createModalLabel">Alta cliente</h5>
+	    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        	<span aria-hidden="true">&times;</span>
+        </button>
+		</div>
+		<div class="modal-body">
+	    <form th:action="@{/clientes}" th:object="${nuevoCliente}" method="POST">
+	        <div class="form-group">
+	            <label for="apellidoNombre">Apellido y Nombre</label>
+	            <input type="text" class="form-control" id="apellidoNombre" placeholder="Apellido y Nombre" th:field="*{apellidoNombre}" required>
+	        </div>
+	        <div class="form-group">
+	            <label for="dni">DNI</label>
+	            <input type="number" class="form-control" id="dni" th:field="*{dni}" required>
+	        </div>
+	        <div class="form-group">
+	            <label for="domicilio">Domicilio</label>
+	            <input type="text" class="form-control" id="domicilio" placeholder="Domicilio" th:field="*{domicilio}" required>
+	        </div>
+	        <div class="form-group">
+	            <label for="email">Correo electrónico</label>
+	            <input type="email" class="form-control" id="email" placeholder="Correo electrónico" th:field="*{email}" required>
+	        </div>
+	        <div class="form-group">
+	            <label for="fechaNacimiento">Fecha de nacimiento</label>
+	            <input type="date" class="form-control" id="fechaNacimiento" placeholder="Fecha de nacimiento" th:field="*{fechaNacimiento}" required>
+	        </div>
+	        <div class="form-group">
+	            <label for="numeroPasaporte">Pasaporte</label>
+	            <input type="number" class="form-control" id="numeroPasaporte" th:field="*{numeroPasaporte}" required>
+	        </div>
+	        <button id="saveBtn" type="submit" class="btn btn-primary btn-lg btn-block">Cargar</button>
+	    </form>
+	    </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit modal -->
+<div class="modal fade" id="editModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">     
+		<div class="modal-header">
+	    <h5 class="modal-title" id="editModalLabel">Editar cliente</h5>
+	    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+        </button>
+		</div>
+		<div class="modal-body">
+	    <form id="updateForm">
+	        <div class="form-group">
+	            <label for="editApellidoNombre">Apellido y Nombre</label>
+	            <input type="text" class="form-control" id="editApellidoNombre" required>
+	        </div>
+	        <div class="form-group">
+	            <label for="editDni">DNI</label>
+	            <input type="number" class="form-control" id="editDni" readonly>
+	        </div>
+	        <div class="form-group">
+	            <label for="editDomicilio">Domicilio</label>
+	            <input type="text" class="form-control" id="editDomicilio" required>
+	        </div>
+	        <div class="form-group">
+	            <label for="editEmail">Correo electrónico</label>
+	            <input type="email" class="form-control" id="editEmail" required>
+	        </div>
+	        <div class="form-group">
+	            <label for="editFechaNacimiento">Fecha de nacimiento</label>
+	            <input type="date" class="form-control" id="editFechaNacimiento" required>
+	        </div>
+	        <div class="form-group">
+	            <label for="editNumeroPasaporte">Pasaporte</label>
+	            <input type="number" class="form-control" id="editNumeroPasaporte" required>
+	        </div>
+	        <button id="modifyBtn" type="submit" class="btn btn-primary btn-lg btn-block">Modificar</button>
+	    </form>
+	    </div>	      
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirmation modal -->
+<div class="modal" id="deleteModal" aria-labelledby="deleteModalLabel" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirmación de borrado</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Está seguro que desea borrar el cliente seleccionado?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+        <button id="deleteConfirmationBtn" type="button" class="btn btn-primary">Si</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+	<script src="/js/clientes.js"></script>
+</body>
+</html>
